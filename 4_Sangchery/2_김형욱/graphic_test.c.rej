@@ -1,0 +1,28 @@
+diff a/4_Sangchery/2_김형욱/graphic_test.c b/4_Sangchery/2_김형욱/graphic_test.c	(rejected hunks)
+@@ -166,18 +166,22 @@
+ 	char input;
+ 	int hue_min = 45, hue_max = 70, sat_min = 2;
+ 	unsigned char tmpchar;
+-	int ret, face = 0;
++	int ret;
+ 	int b_loop = 0;
++	int exer = 0;
+ 	//�ܰ���
+-	int sum_left = 0, sum_right = 0;
+-	int sum_i = 0, sum_j = 0;
++	int r_sum_left = 0, r_sum_right = 0;
++	int l_sum_left = 0, l_sum_right = 0;
++	int r_sum = 0, l_sum = 0;
+ 	int cnt0 = 0;
++	int motion1 = 0;
+ 	float first_x = 0, first_y = 0, second_x = 0, second_y = 0, outline_x = 0, outline_y = 0;
++	int firstx = 0, firsty = 0, secondx = 0, secondy = 0;
+ 	int result = 0;
+ 	//st2
+ 	int motion2 = 0;
+ 	//st3
+-	int cnt3 = 0, motion3 = 0, st3_av_i = 0, st3_sum_i = 0;
++	int cnt3 = 0, motion3 = 0, st3_av_i = 0, st3_sum_i = 0,cnt3_b_w=0;
+ 	int st3_left = 0, st3_right = 0;
+ 	
+ 

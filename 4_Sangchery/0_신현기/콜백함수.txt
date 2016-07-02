@@ -1,0 +1,746 @@
+LRESULT CALLBACK capCallbackOnFrame(HWND hWnd, LPVIDEOHDR lpVHdr)
+{   
+	BYTE pixel;
+	CexcamDlg pColorConv;
+
+	FILE *f1;
+	FILE *f2;
+	FILE *f3;
+	FILE *f4;
+	//FILE *f5;
+	//FILE *f6;
+	FILE *f7;
+	//FILE *degree;
+
+	//f1 = fopen("Mask.txt", "w");
+	//f2 = fopen("value.txt", "w");
+	//f3 = fopen("PingHue.txt", "w");
+	//f4 = fopen("Hue.txt", "w");
+	//f5 = fopen("Hueread.txt", "r");
+	//f6 = fopen("Saturation.txt", "w");
+	f7 = fopen("Result.txt", "w");
+	//degree = fopen("degree.txt", "r");
+
+	int  j, ih, index, counter = 0;
+	if (pImageBuffer == NULL) pImageBuffer = (LPBYTE) new BYTE[BmInfo.bmiHeader.biHeight*BmInfo.bmiHeader.biWidth];
+	float h, s, iv;
+	char *hue = new char[BmInfo.bmiHeader.biWidth*BmInfo.bmiHeader.biHeight];
+	int *hue_ = new int[BmInfo.bmiHeader.biWidth*BmInfo.bmiHeader.biHeight];
+	float *sat = new float[BmInfo.bmiHeader.biWidth*BmInfo.bmiHeader.biHeight];
+	int count[12] = { 0 };
+	int level = 0, hueint = 0;
+
+	/////////////////////////////////////////////////////////////
+	//   각도값 뽑아오기
+	/////////////////////////////////////////////////
+	FILE * pFile1;
+	long lSize1;
+	char * buffer1;
+	size_t result1;
+	int temp1;
+
+	pFile1 = fopen("degree1.txt", "r");
+
+	// 파일의 크기를 ISize 에 저장한다. 
+	fseek(pFile1, 0, SEEK_END);
+	lSize1 = ftell(pFile1);
+	rewind(pFile1);
+
+	// 전체 파일의 내용을 받을 수 있을 정도의 크기로 메모리를 할당한다. 
+	buffer1 = (char*)malloc(sizeof(char)*lSize1);
+
+	// 그 파일의 내용을 버퍼에 저장한다. 
+	result1 = fread(buffer1, 1, lSize1, pFile1);
+
+	for (i = 0; i < lSize1; i++){
+		temp1 = *(buffer1 + i) - '0';
+		*(buffer1 + i) = temp1;
+	}
+	temp1 = lSize1 / 3;
+	int *degree1 = new int[temp1];
+	for (i = 0; i < temp1; i++){
+		*(degree1 + i) = *(buffer1 + 3 * i) * 100 + *(buffer1 + 3 * i + 1) * 10 + *(buffer1 + 3 * i + 2) * 1;
+	}
+	//for (i = 0; i < 10;i++)
+	// fprintf(f7, "%d ", *(degree1 + i));
+	fclose(pFile1);
+	free(buffer1);
+	////////////////////////////////////////////////////////
+
+	char *hbuffer1;
+	f1 = fopen("hueaver1.txt", "r");
+
+	// 파일의 크기를 ISize 에 저장한다. 
+	fseek(f1, 0, SEEK_END);
+	lSize1 = ftell(f1);
+	rewind(f1);
+
+	// 전체 파일의 내용을 받을 수 있을 정도의 크기로 메모리를 할당한다. 
+	hbuffer1 = (char*)malloc(sizeof(char)*lSize1);
+
+	// 그 파일의 내용을 버퍼에 저장한다. 
+	result1 = fread(hbuffer1, 1, lSize1, f1);
+
+	for (i = 0; i < lSize1; i++){
+		temp1 = *(hbuffer1 + i) - '0';
+		*(hbuffer1 + i) = temp1;
+	}
+
+	temp1 = lSize1 / 3;
+	int *hueaver1 = new int[temp1];
+	for (i = 0; i < temp1; i++){
+		*(hueaver1 + i) = *(hbuffer1 + 3 * i) * 100 + *(hbuffer1 + 3 * i + 1) * 10 + *(hbuffer1 + 3 * i + 2) * 1;
+		fprintf(f1, "(%d)", *(hueaver1 + i));
+	}
+	//fprintf(f7, " %d", *(hueaver1 + 10));
+	free(hbuffer1);
+
+	//----------------------------------------------------------------------------------------------------------------
+
+	/////////////////////////////////////////////////////////////
+	//   각도값 뽑아오기
+	/////////////////////////////////////////////////
+	FILE * pFile2;
+	long lSize2;
+	char * buffer2;
+	size_t result2;
+	int temp2;
+
+	pFile2 = fopen("degree2.txt", "r");
+
+	// 파일의 크기를 ISize 에 저장한다. 
+	fseek(pFile2, 0, SEEK_END);
+	lSize2 = ftell(pFile2);
+	rewind(pFile2);
+
+	// 전체 파일의 내용을 받을 수 있을 정도의 크기로 메모리를 할당한다. 
+	buffer2 = (char*)malloc(sizeof(char)*lSize2);
+
+	// 그 파일의 내용을 버퍼에 저장한다. 
+	result2 = fread(buffer2, 1, lSize2, pFile2);
+
+	for (i = 0; i < lSize2; i++){
+		temp2 = *(buffer2 + i) - '0';
+		*(buffer2 + i) = temp2;
+	}
+	temp2 = lSize2 / 3;
+	int *degree2 = new int[temp2];
+	for (i = 0; i < temp2; i++){
+		*(degree2 + i) = *(buffer2 + 3 * i) * 100 + *(buffer2 + 3 * i + 1) * 10 + *(buffer2 + 3 * i + 2) * 1;
+	}
+	//for (i = 0; i < 10;i++)
+	// fprintf(f7, "%d ", *(degree2 + i));
+	fclose(pFile2);
+	free(buffer2);
+	////////////////////////////////////////////////////////
+
+	char *hbuffer2;
+	f2 = fopen("hueaver2.txt", "r");
+
+	// 파일의 크기를 ISize 에 저장한다. 
+	fseek(f2, 0, SEEK_END);
+	lSize2 = ftell(f2);
+	rewind(f2);
+
+	// 전체 파일의 내용을 받을 수 있을 정도의 크기로 메모리를 할당한다. 
+	hbuffer2 = (char*)malloc(sizeof(char)*lSize2);
+
+	// 그 파일의 내용을 버퍼에 저장한다. 
+	result2 = fread(hbuffer2, 1, lSize2, f2);
+
+	for (i = 0; i < lSize2; i++){
+		temp2 = *(hbuffer2 + i) - '0';
+		*(hbuffer2 + i) = temp2;
+	}
+
+	temp2 = lSize2 / 3;
+	int *hueaver2 = new int[temp2];
+	for (i = 0; i < temp2; i++){
+		*(hueaver2 + i) = *(hbuffer2 + 3 * i) * 100 + *(hbuffer2 + 3 * i + 1) * 10 + *(hbuffer2 + 3 * i + 2) * 1;
+		fprintf(f2, "(%d)", *(hueaver2 + i));
+	}
+	//fprintf(f7, " %d", *(hueaver2 + 10));
+	free(hbuffer2);
+
+	//----------------------------------------------------------------------------------------------------------------
+
+	/////////////////////////////////////////////////////////////
+	//   각도값 뽑아오기
+	/////////////////////////////////////////////////
+	FILE * pFile3;
+	long lSize3;
+	char * buffer3;
+	size_t result3;
+	int temp3;
+
+	pFile3 = fopen("degree3.txt", "r");
+
+	// 파일의 크기를 ISize 에 저장한다. 
+	fseek(pFile3, 0, SEEK_END);
+	lSize3 = ftell(pFile3);
+	rewind(pFile3);
+
+	// 전체 파일의 내용을 받을 수 있을 정도의 크기로 메모리를 할당한다. 
+	buffer3 = (char*)malloc(sizeof(char)*lSize3);
+
+	// 그 파일의 내용을 버퍼에 저장한다. 
+	result3 = fread(buffer3, 1, lSize3, pFile3);
+
+	for (i = 0; i < lSize3; i++){
+		temp3 = *(buffer3 + i) - '0';
+		*(buffer3 + i) = temp3;
+	}
+	temp3 = lSize3 / 3;
+	int *degree3 = new int[temp3];
+	for (i = 0; i < temp3; i++){
+		*(degree3 + i) = *(buffer3 + 3 * i) * 100 + *(buffer3 + 3 * i + 1) * 10 + *(buffer3 + 3 * i + 2) * 1;
+	}
+	//for (i = 0; i < 10;i++)
+	// fprintf(f7, "%d ", *(degree3 + i));
+	fclose(pFile3);
+	free(buffer3);
+	////////////////////////////////////////////////////////
+
+	char *hbuffer3;
+	f3 = fopen("hueaver3.txt", "r");
+
+	// 파일의 크기를 ISize 에 저장한다. 
+	fseek(f3, 0, SEEK_END);
+	lSize3 = ftell(f3);
+	rewind(f3);
+
+	// 전체 파일의 내용을 받을 수 있을 정도의 크기로 메모리를 할당한다. 
+	hbuffer3 = (char*)malloc(sizeof(char)*lSize3);
+
+	// 그 파일의 내용을 버퍼에 저장한다. 
+	result3 = fread(hbuffer3, 1, lSize3, f3);
+
+	for (i = 0; i < lSize3; i++){
+		temp3 = *(hbuffer3 + i) - '0';
+		*(hbuffer3 + i) = temp3;
+	}
+
+	temp3 = lSize3 / 3;
+	int *hueaver3 = new int[temp3];
+	for (i = 0; i < temp3; i++){
+		*(hueaver3 + i) = *(hbuffer3 + 3 * i) * 100 + *(hbuffer3 + 3 * i + 1) * 10 + *(hbuffer3 + 3 * i + 2) * 1;
+		fprintf(f3, "(%d)", *(hueaver3 + i));
+	}
+	//fprintf(f7, " %d", *(hueaver3 + 10));
+	free(hbuffer3);
+
+	//----------------------------------------------------------------------------------------------------------------
+
+	/////////////////////////////////////////////////////////////
+	//   각도값 뽑아오기
+	/////////////////////////////////////////////////
+	FILE * pFile4;
+	long lSize4;
+	char * buffer4;
+	size_t result4;
+	int temp4;
+
+	pFile4 = fopen("degree4.txt", "r");
+
+	// 파일의 크기를 ISize 에 저장한다. 
+	fseek(pFile4, 0, SEEK_END);
+	lSize4 = ftell(pFile4);
+	rewind(pFile4);
+
+	// 전체 파일의 내용을 받을 수 있을 정도의 크기로 메모리를 할당한다. 
+	buffer4 = (char*)malloc(sizeof(char)*lSize4);
+
+	// 그 파일의 내용을 버퍼에 저장한다. 
+	result4 = fread(buffer4, 1, lSize4, pFile4);
+
+	for (i = 0; i < lSize4; i++){
+		temp4 = *(buffer4 + i) - '0';
+		*(buffer4 + i) = temp4;
+	}
+	temp4 = lSize4 / 3;
+	int *degree4 = new int[temp4];
+	for (i = 0; i < temp4; i++){
+		*(degree4 + i) = *(buffer4 + 3 * i) * 100 + *(buffer4 + 3 * i + 1) * 10 + *(buffer4 + 3 * i + 2) * 1;
+	}
+	//for (i = 0; i < 10;i++)
+	// fprintf(f7, "%d ", *(degree4 + i));
+	fclose(pFile4);
+	free(buffer4);
+	////////////////////////////////////////////////////////
+
+	char *hbuffer4;
+	f4 = fopen("hueaver4.txt", "r");
+
+	// 파일의 크기를 ISize 에 저장한다. 
+	fseek(f4, 0, SEEK_END);
+	lSize4 = ftell(f4);
+	rewind(f4);
+
+	// 전체 파일의 내용을 받을 수 있을 정도의 크기로 메모리를 할당한다. 
+	hbuffer4 = (char*)malloc(sizeof(char)*lSize4);
+
+	// 그 파일의 내용을 버퍼에 저장한다. 
+	result4 = fread(hbuffer4, 1, lSize4, f4);
+
+	for (i = 0; i < lSize4; i++){
+		temp4 = *(hbuffer4 + i) - '0';
+		*(hbuffer4 + i) = temp4;
+	}
+
+	temp4 = lSize4 / 3;
+	int *hueaver4 = new int[temp4];
+	for (i = 0; i < temp4; i++){
+		*(hueaver4 + i) = *(hbuffer4 + 3 * i) * 100 + *(hbuffer4 + 3 * i + 1) * 10 + *(hbuffer4 + 3 * i + 2) * 1;
+		fprintf(f4, "(%d)", *(hueaver4 + i));
+	}
+	//fprintf(f7, " %d", *(hueaver4 + 10));
+	free(hbuffer4);
+
+	//----------------------------------------------------------------------------------------------------------------
+
+	for (i = 0; i < BmInfo.bmiHeader.biWidth*BmInfo.bmiHeader.biHeight; i++)
+	{
+		float b = *(lpVHdr->lpData + (i * 3)) / 255.0f;
+		float g = *(lpVHdr->lpData + (i * 3) + 1) / 255.0f;
+		float r = *(lpVHdr->lpData + (i * 3) + 2) / 255.0f;
+
+		pColorConv.RGB_To_HSI(r, g, b, &h, &s, &iv);
+		hueint = (int)h;
+		*(hue_ + i) = hueint;
+
+		*(sat + i) = s;
+		ih = (int)(h*255.0 / 360.0);
+
+		if ((*(lpVHdr->lpData + (i * 3)) + *(lpVHdr->lpData + (i * 3) + 1) + *(lpVHdr->lpData + (i * 3) + 2)) > 600 && *(sat + i) < 0.3)
+			hueint = -1;//블랙
+		else if ((*(lpVHdr->lpData + (i * 3)) + *(lpVHdr->lpData + (i * 3) + 1) + *(lpVHdr->lpData + (i * 3) + 2)) < 90 && *(sat + i) < 0.3)
+			hueint = -1;//화이트
+
+
+		if (0 < hueint&&hueint <= 30) level = 'a'; if (30 < hueint&&hueint <= 60) level = 'b'; if (60 < hueint&&hueint <= 90) level = 'c'; if (90 < hueint&&hueint <= 120) level = 'd'; if (120 < hueint&&hueint <= 150) level = 'e'; if (150 < hueint&&hueint <= 180) level = 'f';
+		if (180 < hueint&&hueint <= 210) level = 'g'; if (210 < hueint&&hueint <= 240) level = 'h'; if (240 < hueint&&hueint <= 270) level = 'i'; if (270 < hueint&&hueint <= 300) level = 'j'; if (300 < hueint&&hueint <= 330) level = 'k'; if (330 < hueint&&hueint <= 360) level = 'l'; if (hueint == -1) level = 'z';
+
+		//fprintf(f1, "(%d) ", (int)h);
+		*(hue + i) = level;
+		//fprintf(f4, "%c", *(hue + i));
+		if (level == 'a') count[0]++; if (level == 'b') count[1]++; if (level == 'c') count[2]++; if (level == 'd') count[3]++; if (level == 'e') count[4]++; if (level == 'f') count[5]++;
+		if (level == 'g') count[6]++; if (level == 'h') count[7]++; if (level == 'i') count[8]++; if (level == 'j') count[9]++; if (level == 'k') count[10]++; if (level == 'l') count[11]++;
+
+	}
+
+	int  gray, k, l, m, index1, index2, index3, winsize = 3;
+	int rwsize = (((24 * BmInfo.bmiHeader.biWidth) + 31) / 32 * 4);
+	if (pImageBuffer == NULL) pImageBuffer = (LPBYTE) new BYTE[BmInfo.bmiHeader.biHeight*BmInfo.bmiHeader.biWidth];
+	float mul = 1;
+	float *Mask = new float[winsize*winsize];
+	float *Mask2 = new float[winsize*winsize];
+
+	int *ping = new int[BmInfo.bmiHeader.biWidth*BmInfo.bmiHeader.biHeight * 9];
+	float *gray0 = new float[3 * BmInfo.bmiHeader.biWidth*BmInfo.bmiHeader.biHeight];
+	float *theta = new float[BmInfo.bmiHeader.biWidth*BmInfo.bmiHeader.biHeight];
+	float thetaa = 0;
+
+	for (i = 0; i < BmInfo.bmiHeader.biWidth*BmInfo.bmiHeader.biHeight; i++)
+	{
+		float b = *(lpVHdr->lpData + (i * 3));
+		float g = *(lpVHdr->lpData + (i * 3) + 1);
+		float r = *(lpVHdr->lpData + (i * 3) + 2);
+
+		*(gray0 + (i * 3)) = (b + g + r) / 3;
+		*(gray0 + (i * 3) + 1) = (b + g + r) / 3;
+		*(gray0 + (i * 3) + 2) = (b + g + r) / 3;
+	}
+
+
+	Mask[0] = 1.0f; Mask[1] = 1.0f; Mask[2] = 1.0f;//Y마스크
+	Mask[3] = 0.0f*mul; Mask[4] = 0.0f*mul; Mask[5] = 0.0f*mul;
+	Mask[6] = -1.0f; Mask[7] = -1.0f; Mask[8] = -1.0f;
+
+	Mask2[0] = -1.0f; Mask2[1] = 0.0f*mul; Mask2[2] = 1.0f;//X마스크
+	Mask2[3] = -1.0f; Mask2[4] = 0.0f*mul; Mask2[5] = 1.0f;
+	Mask2[6] = -1.0f; Mask2[7] = 0.0f*mul; Mask2[8] = 1.0f;
+
+
+	int n = (winsize - 1) >> 1;
+	int count0 = 0;
+	int rr = 0, t;//ping배열에 특징점의 hue값 9개 넣기위해서 선언
+	int total_s = 1;
+	int special_s = 1;
+
+	int comcount = 0;
+	float divide_s = 0;
+
+
+
+	switch (iSW)
+	{
+	case 1:
+
+		for (i = n; i < BmInfo.bmiHeader.biHeight - n; i++){
+			index1 = i*rwsize;
+			for (j = n; j < BmInfo.bmiHeader.biWidth - n; j++){
+				float sum1 = 0.0f;
+				float sum4 = 0.0f;
+
+				for (k = -n; k <= n; k++){
+					index2 = (i + k)*rwsize;
+					index3 = (k + n)*winsize;
+					for (l = -n; l <= n; l++)
+					{
+						sum1 += *(gray0 + index2 + 3 * (j + l))*Mask[index3 + l + n];
+						sum4 += *(gray0 + index2 + 3 * (j + l))*Mask2[index3 + l + n];
+					}
+				}
+
+				float hap1;
+				hap1 = sqrt(sum1*sum1 + sum4*sum4);
+
+				if (hap1 > 100)
+					hap1 = 255;
+
+				else
+					hap1 = 0;
+
+				if (hap1 == 255)
+				{
+					if (*(hue + (BmInfo.bmiHeader.biWidth*i + j)) == 'b')
+					{
+						total_s++;
+
+						if (*(sat + (BmInfo.bmiHeader.biWidth*i + j)) >= 0.1 &&  *(sat + (BmInfo.bmiHeader.biWidth*i + j)) < 0.4)
+						{
+							special_s++;
+							*(ping + rr) = (*(hue_ + (BmInfo.bmiHeader.biWidth*(i - 1) + (j - 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i - 1) + (j)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i - 1) + (j + 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i)+(j - 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i)+(j)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i)+(j + 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i + 1) + (j - 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i + 1) + (j)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i + 1) + (j + 1)))) / 9;
+							while (*(ping + rr) > 360)
+								*(ping + rr) -= 360;
+
+							*(theta + rr) = atan2(sum1, sum4)*180.0 / 3.141592;
+							if (*(theta + rr) < 0) *(theta + rr) += 360.0;
+							count0++;
+							rr++;
+
+						}
+					}
+
+				}
+			}
+		}
+		fprintf(f7, "\n\n%d %d\n\n", total_s, special_s);
+
+		divide_s = (float)special_s / (float)total_s;
+
+		if (divide_s >0.5){
+			for (j = 0; j < temp1; j++)//사진에서 불러온 크기
+			{
+				for (i = 0; i < count0; i++)//영상에서 불러온 크기
+				{
+					if (*(ping + i) == hueaver1[j]){//fprintf(f7, "7");
+						if (*(degree1 + j) > *(theta + i) - 10 && *(degree1 + j) < *(theta + i) + 10)
+						{
+							comcount++;
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		if (comcount >= 180)
+			iSW = 8; // MATCH
+		else iSW = 9; // MISMATCH
+
+		break;
+
+	case 2:
+
+		for (i = n; i < BmInfo.bmiHeader.biHeight - n; i++){
+			index1 = i*rwsize;
+			for (j = n; j < BmInfo.bmiHeader.biWidth - n; j++){
+				float sum1 = 0.0f;
+				float sum4 = 0.0f;
+
+				for (k = -n; k <= n; k++){
+					index2 = (i + k)*rwsize;
+					index3 = (k + n)*winsize;
+					for (l = -n; l <= n; l++)
+					{
+						sum1 += *(gray0 + index2 + 3 * (j + l))*Mask[index3 + l + n];
+						sum4 += *(gray0 + index2 + 3 * (j + l))*Mask2[index3 + l + n];
+					}
+				}
+
+				float hap1;
+				hap1 = sqrt(sum1*sum1 + sum4*sum4);
+
+				if (hap1 > 100)
+					hap1 = 255;
+
+				else
+					hap1 = 0;
+
+				if (hap1 == 255)
+				{
+					if (*(hue + (BmInfo.bmiHeader.biWidth*i + j)) == 'b')
+					{
+						total_s++;
+
+						if (*(sat + (BmInfo.bmiHeader.biWidth*i + j)) >= 0.6 &&  *(sat + (BmInfo.bmiHeader.biWidth*i + j)) < 0.9)
+						{
+							special_s++;
+							*(ping + rr) = (*(hue_ + (BmInfo.bmiHeader.biWidth*(i - 1) + (j - 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i - 1) + (j)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i - 1) + (j + 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i)+(j - 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i)+(j)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i)+(j + 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i + 1) + (j - 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i + 1) + (j)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i + 1) + (j + 1)))) / 9;
+							while (*(ping + rr) > 360)
+								*(ping + rr) -= 360;
+
+							*(theta + rr) = atan2(sum1, sum4)*180.0 / 3.141592;
+							if (*(theta + rr) < 0) *(theta + rr) += 360.0;
+							count0++;
+							rr++;
+
+						}
+
+					}
+				}
+			}
+		}
+		fprintf(f7, "\n\n%d %d\n\n", total_s, special_s);
+
+		divide_s = (float)special_s / (float)total_s;
+
+		if (divide_s > 0.13&&total_s>200){
+			for (j = 0; j < temp2; j++)//사진에서 불러온 크기
+			{
+				for (i = 0; i < count0; i++)//영상에서 불러온 크기
+				{
+					if (*(ping + i) == hueaver2[j]){//fprintf(f7, "7");
+						if (*(degree2 + j) > *(theta + i) - 10 && *(degree2 + j) < *(theta + i) + 10)
+						{
+							comcount++;
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		if (comcount >= 70)
+			iSW = 8; // MATCH
+		else iSW = 9; // MISMATCH
+
+		break;
+
+	case 3:
+
+		for (i = n; i < BmInfo.bmiHeader.biHeight - n; i++){
+			index1 = i*rwsize;
+			for (j = n; j < BmInfo.bmiHeader.biWidth - n; j++){
+				float sum1 = 0.0f;
+				float sum4 = 0.0f;
+
+				for (k = -n; k <= n; k++){
+					index2 = (i + k)*rwsize;
+					index3 = (k + n)*winsize;
+					for (l = -n; l <= n; l++)
+					{
+						sum1 += *(gray0 + index2 + 3 * (j + l))*Mask[index3 + l + n];
+						sum4 += *(gray0 + index2 + 3 * (j + l))*Mask2[index3 + l + n];
+					}
+				}
+
+				float hap1;
+				hap1 = sqrt(sum1*sum1 + sum4*sum4);
+
+				if (hap1 > 100)
+					hap1 = 255;
+
+				else
+					hap1 = 0;
+
+				if (hap1 == 255)
+				{
+					if (*(hue + (BmInfo.bmiHeader.biWidth*i + j)) == 'a')
+					{
+						total_s++;
+						if (count[0]>count[1])
+						if (*(sat + (BmInfo.bmiHeader.biWidth*i + j)) >= 0.0 &&  *(sat + (BmInfo.bmiHeader.biWidth*i + j)) < 0.3)
+						{
+							special_s++;
+							*(ping + rr) = (*(hue_ + (BmInfo.bmiHeader.biWidth*(i - 1) + (j - 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i - 1) + (j)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i - 1) + (j + 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i)+(j - 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i)+(j)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i)+(j + 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i + 1) + (j - 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i + 1) + (j)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i + 1) + (j + 1)))) / 9;
+							while (*(ping + rr) > 360)
+								*(ping + rr) -= 360;
+
+							*(theta + rr) = atan2(sum1, sum4)*180.0 / 3.141592;
+							if (*(theta + rr) < 0) *(theta + rr) += 360.0;
+							count0++;
+							rr++;
+
+						}
+					}
+				}
+			}
+		}
+		fprintf(f7, "\n\n%d %d\n\n", total_s, special_s);
+
+		divide_s = (float)special_s / (float)total_s;
+
+		if (divide_s >0.5){
+			for (j = 0; j < temp3; j++)//사진에서 불러온 크기
+			{
+				for (i = 0; i < count0; i++)//영상에서 불러온 크기
+				{
+					if (*(ping + i) == hueaver3[j]){//fprintf(f7, "7");
+						if (*(degree3 + j) > *(theta + i) - 10 && *(degree3 + j) < *(theta + i) + 10)
+						{
+							comcount++;
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		if (comcount >= 100)
+			iSW = 8; // MATCH
+		else iSW = 9; // MISMATCH
+
+		break;
+
+	case 4:
+
+		for (i = n; i < BmInfo.bmiHeader.biHeight - n; i++){
+			index1 = i*rwsize;
+			for (j = n; j < BmInfo.bmiHeader.biWidth - n; j++){
+				float sum1 = 0.0f;
+				float sum4 = 0.0f;
+
+				for (k = -n; k <= n; k++){
+					index2 = (i + k)*rwsize;
+					index3 = (k + n)*winsize;
+					for (l = -n; l <= n; l++)
+					{
+						sum1 += *(gray0 + index2 + 3 * (j + l))*Mask[index3 + l + n];
+						sum4 += *(gray0 + index2 + 3 * (j + l))*Mask2[index3 + l + n];
+					}
+				}
+
+				float hap1;
+				hap1 = sqrt(sum1*sum1 + sum4*sum4);
+
+				if (hap1 > 100)
+					hap1 = 255;
+
+				else
+					hap1 = 0;
+
+				if (hap1 == 255)
+				{
+					if ((*(hue)+(BmInfo.bmiHeader.biWidth*i + j) != 'z') && (*(hue)+(BmInfo.bmiHeader.biWidth*i + j) != 'b'))
+					//th//if (*(hue + (BmInfo.bmiHeader.biWidth*i + j)) == 'c' || *(hue + (BmInfo.bmiHeader.biWidth*i + j)) == 'b')
+					{
+						total_s++;
+						//if(count[0] < count[2]&&count[1]<count[2])
+						if(3*count[0]<count[2])
+						//{
+						if (*(sat + (BmInfo.bmiHeader.biWidth*i + j)) >= 0.0 &&  *(sat + (BmInfo.bmiHeader.biWidth*i + j)) < 0.4)
+						//if (*(sat + (BmInfo.bmiHeader.biWidth*i + j)) >= 0.1 &&  *(sat + (BmInfo.bmiHeader.biWidth*i + j)) < 0.3)
+						{
+							special_s++;
+							*(ping + rr) = (*(hue_ + (BmInfo.bmiHeader.biWidth*(i - 1) + (j - 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i - 1) + (j)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i - 1) + (j + 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i)+(j - 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i)+(j)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i)+(j + 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i + 1) + (j - 1)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i + 1) + (j)))
+								+ *(hue_ + (BmInfo.bmiHeader.biWidth*(i + 1) + (j + 1)))) / 9;
+							while (*(ping + rr) > 360)
+								*(ping + rr) -= 360;
+
+							*(theta + rr) = atan2(sum1, sum4)*180.0 / 3.141592;
+							if (*(theta + rr) < 0) *(theta + rr) += 360.0;
+							count0++;
+							rr++;
+
+						}
+						//}
+					}
+				}
+			}
+		}
+		fprintf(f7, "\n\n%d %d\n\n", total_s, special_s);
+
+		divide_s = (float)special_s / (float)total_s;
+
+		if (divide_s > 0.5){
+
+			for (j = 0; j < temp4; j++)//사진에서 불러온 크기
+			{
+				for (i = 0; i < count0; i++)//영상에서 불러온 크기
+				{
+					if (*(ping + i) == hueaver4[j]){//fprintf(f7, "7");
+						if (*(degree4 + j) > *(theta + i) - 10 && *(degree4 + j) < *(theta + i) + 10)
+						{
+							comcount++;
+							break;
+						}
+					}
+				}
+			}
+		}
+		fprintf(f7, "%d", comcount);
+		if (comcount >= 180)
+			iSW = 8; // MATCH
+		else iSW = 9; // MISMATCH
+
+		break;
+	}
+
+
+	fclose(f1);
+	fclose(f2);
+	fclose(f3);
+	fclose(f4);
+	//fclose(f5);
+	//fclose(f6);
+	fclose(f7);
+	//fclose(degree1);
+	//fclose(pFile);
+	//free(buffer);
+
+	delete[] degree1;
+	delete[] degree2;
+	delete[] degree3;
+	delete[] degree4;
+	delete[] Mask;
+	delete[] Mask2;
+	delete[] hue;
+	delete[] ping;
+	delete[] pImageBuffer;
+	delete[] theta;
+
+	return (LRESULT)TRUE;
+}

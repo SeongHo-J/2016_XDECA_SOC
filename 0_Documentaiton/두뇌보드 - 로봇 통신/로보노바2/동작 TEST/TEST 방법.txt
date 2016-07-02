@@ -1,0 +1,7 @@
+1. SoC Robot_Sample Demo.bas를 로봇에 다운로드
+2. 두뇌보드와 로봇을 연결한 후 SoC_Robot_SW.tar.gz에 들어 있는
+   Metal_Fighter_RobotBody의 실행파일을 다운로드 한 후 실행
+3. 하이퍼터미널에서
+   키보드의 a 버튼: 반보전진
+   키보드의 b 버튼: 한보전진
+* 모션에 따라 로봇이 급격히 움직일 수 있으니 주의

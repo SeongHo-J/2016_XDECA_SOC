@@ -1,0 +1,31 @@
+
+	Mask[0] = 1.0f; Mask[1] = 1.0f; Mask[2] = 1.0f; Mask[3] = 0.0f;
+	Mask[4] = 0.0f; Mask[5] = 0.0f; Mask[6] = -1.0f; Mask[7] = -1.0f; Mask[8] = -1.0f;
+
+	Mask2[0] = -1.0f; Mask2[1] = 0.0f; Mask2[2] = 1.0f; Mask2[3] = -1.0f;
+	Mask2[4] = 0.0f; Mask2[5] = 1.0f; Mask2[6] = -1.0f; Mask2[7] = 0.0f; Mask2[8] = 1.0f;
+
+
+
+
+	int n = (winsize - 1) >> 1;
+	int x = 0;
+
+	for (i = n; i < height - n; i++){
+		index1 = i*rwsize;
+		for (j = n; j < width - n; j++){
+			float sum1 = 0.0f;
+			float sum4 = 0.0f;
+			float sum7 = 0.0f;
+			float sum10 = 0.0f;
+
+			for (k = -n; k <= n; k++){
+				index2 = (i + k)*rwsize;
+				index3 = (k + n)*winsize;
+				for (l = -n; l <= n; l++){
+					sum1 += InImg[index2 + 3 * (j + l)] * Mask[index3 + l + n];
+
+					sum4 += InImg[index2 + 3 * (j + l)] * Mask2[index3 + l + n];
+
+				}
+			}
